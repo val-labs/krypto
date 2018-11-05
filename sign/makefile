@@ -16,5 +16,5 @@ testing: $(PROG)
 	@cat Makefile.psig Makefile | ./sign -u -V
 lib%.a: %.a; cp $< $@ && cp $@ ..
 #include makefile.inc
-clean: ; rm -fr $(PROG)
+clean: ; rm -fr $(PROG) *sig
 

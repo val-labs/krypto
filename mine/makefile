@@ -13,4 +13,4 @@ test: $(PROG)
 	/bin/cat -vet 1 ; echo
 	/bin/cat -vet 2
 	@echo %%%%%%%%%%%%%%%%%%%
-clean:;	@rm -fr $(PROG)
+clean:;	@rm -fr $(PROG) ?
