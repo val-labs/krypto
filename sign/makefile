@@ -1,7 +1,9 @@
 # -*- Makefile -*-
 PROG=sign
-CFLAGS+=-I../util -I../ed25519
-LDFLAGS=-L.. -lutil -led25519
+INCS=-I../util -I../ed25519
+LIBS=-lutil -led25519
+CFLAGS+=$(INCS)
+LDFLAGS=-L.. $(LIBS) $(INCS)
 all: clean $(PROG) testing
 testing: $(PROG)
 	@./sign                                                     || echo ==PASS1==
@@ -13,4 +15,6 @@ testing: $(PROG)
 	@cat Makefile.psig Makefile | ./sign -u -V --seed Makefile  || echo ==PASS7==
 	@cat Makefile.psig Makefile | ./sign -u -V
 lib%.a: %.a; cp $< $@ && cp $@ ..
-include makefile.inc
+#include makefile.inc
+clean: ; rm -fr $(PROG)
+
