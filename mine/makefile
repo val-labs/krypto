@@ -1,8 +1,10 @@
-# -*- Makefile -*-
+# -*- makefile -*-
 PROG=mine
 CFLAGS+=-I../util -I../ed25519
-LDFLAGS=../util/util.a ../ed25519/ed25519.a
+LDFLAGS=-L.. -lutil -led25519
 all: clean test
+$(PROG): $(PROG).c
+        $(CC) $< -o $@ $(CFLAGS) $(LDFLAGS)
 test: $(PROG)
 	@echo %%%%%%%%%%%%%%%%%%%
 	@./$(PROG) -b 15 -d 8 <makefile 1>1 2>2
