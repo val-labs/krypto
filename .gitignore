@@ -1,0 +1,11 @@
+test
+test2
+sign
+mine
+rmd160test
+
+*.a
+*.o
+*.so
+*.sig
+?
