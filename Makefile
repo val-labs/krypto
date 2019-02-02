@@ -3,5 +3,5 @@ SUBDIRS=util ed25519 sign mine
 world: all; @echo ========================================
 %:;	for f in $(SUBDIRS); do $(MAKE) -C $$f $@; done
 clean:
-	rm -fr lib*.a
+	rm -fr lib*.a */*.o */*.a */*~
 	for f in $(SUBDIRS); do $(MAKE) -C $$f $@; done
