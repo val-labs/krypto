@@ -66,7 +66,7 @@ int main(int argc, char*argv[]) {
     scan_line(buf+M[1]+6, M[2]-M[1]-7, signature+32);
     buf  += M[2]; bytes = M[3] - M[2];
     goto verify_signature;
-  case 'S': case 's': 
+  case 'S': goto create_signature; case 's': create_signature:
     ed25519_create_keypair(public_key, private_key, seed);
     if(action=='S'){ printf("pubk: "); DUMP(public_key, 32); }
     ed25519_sign(signature, buf, bytes, public_key, private_key);

@@ -8,3 +8,4 @@ clean:
 install: all
 	cp sign/sign /usr/local/bin
 	cp mine/mine /usr/local/bin
+docker: ; docker build . -t uu && docker run -it --rm uu
