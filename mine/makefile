@@ -1,10 +1,12 @@
 # -*- makefile -*-
 PROG=mine
-CFLAGS+=-I../util -I../ed25519
-LDFLAGS=-L.. -lutil -led25519
-all: clean test
-$(PROG): $(PROG).c
-	$(CC) $< -o $@ $(CFLAGS) $(LDFLAGS)
+BINS=$(PROG)
+INCS=-I../util -I../ed25519
+LIBS=-lutil -led25519
+CFLAGS+=$(INCS)
+LDFLAGS=-L.. $(LIBS)
+all: clean $(BINS) test
+.c: ; $(CC) $< -o $@ $(CFLAGS) $(LDFLAGS)
 test: $(PROG)
 	@echo %%%%%%%%%%%%%%%%%%%
 	@./$(PROG) -b 15 -d 8 <makefile 1>1 2>2
@@ -15,4 +17,5 @@ test: $(PROG)
 	/bin/cat -vet 1 ; echo
 	/bin/cat -vet 2
 	@echo %%%%%%%%%%%%%%%%%%%
-clean:;	@rm -fr $(PROG) ?
+clean: ; @sh ../clean.sh
+
