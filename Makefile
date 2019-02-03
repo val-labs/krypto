@@ -5,3 +5,6 @@ world: all; @echo ========================================
 clean:
 	rm -fr lib*.a */*.o */*.a */*~
 	for f in $(SUBDIRS); do $(MAKE) -C $$f $@; done
+install: all
+	cp sign/sign /usr/local/bin
+	cp mine/mine /usr/local/bin
