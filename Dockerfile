@@ -5,5 +5,4 @@ RUN apt-get -y install apt-utils
 RUN apt-get -y install build-essential
 COPY . .
 RUN make install
-COPY run.sh /bin
-ENTRYPOINT ["run.sh"]
+ENTRYPOINT ["/docker.sh"]
