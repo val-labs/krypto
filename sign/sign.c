@@ -9,7 +9,7 @@
 #define  WRN(fmt,...) ((fprintf(stderr, "%s:%d:ERR: " fmt   "", __FILE__, __LINE__, ##__VA_ARGS__)))
 #define  DIE(fmt,...) ((fprintf(stderr, "%s:%d:DIE: " fmt "\n", __FILE__, __LINE__, ##__VA_ARGS__),exit(1)))
 #define PERR(fmt,...) ((fprintf(stderr, "%s:%d:ERR: " fmt   "", __FILE__, __LINE__, ##__VA_ARGS__),perror(""),exit(1)))
-#define DUMP(s,m) for(int n=0;n<m;n++)printf("%02x%s",(s)[n],(n+1)%32?"":"\n");
+#define DUMP(x,s,m) {printf(x);for(int n=0;n<m;n++)printf("%02x%s",(s)[n],(n+1)%32?"":"\n");}
 #define default break;default
 #define case    break;case
 unsigned char* read_seed(char* filename, unsigned char*buf) {
@@ -68,10 +68,10 @@ int main(int argc, char*argv[]) {
     goto verify_signature;
   case 'S': goto create_signature; case 's': create_signature:
     ed25519_create_keypair(public_key, private_key, seed);
-    if(action=='S'){ printf("pubk: "); DUMP(public_key, 32); }
+    if(action=='S') DUMP("pubk: ", public_key, 32);
     ed25519_sign(signature, buf, bytes, public_key, private_key);
-    printf("sig1: "); DUMP(signature, 32);
-    printf("sig2: "); DUMP(signature+32, 32);
+    DUMP("sig1: ", signature   , 32);
+    DUMP("sig2: ", signature+32, 32);
   verify_signature:
     if (!ed25519_verify(signature, buf, bytes, public_key))
       DIE("invalid signature");
