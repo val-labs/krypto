@@ -29,13 +29,21 @@
 
           Module.forkOff(34, 12);
 
-	  var s1 = xsignit("xyz\n");
-	  outs("it's " + s1);
-	  var s2 = xverify(s1);
-	  outs("it's " + s2);
-	  var s3 = xverify("wrong");
-	  outs("it's " + s3);
+	  var m1 = "xyz\n";
 
+	  var s1 = xsignit(m1);
+	  outs("it's " + s1);
+
+	  var sig = s1.split('\n').splice(2,4).join('\n');
+	  outs("2it's " + sig);	  
+
+	  var s2 = xverify(sig +m1);
+	  outs("it's " + s2);
+	  var s3 = xverify(sig + "wrong");
+	  outs("it's " + s3);
+	  var s4 = xverify("no way" + m1);
+	  outs("it's " + s4);
+	  
           console.log('lerp2result: ' +
 		      Module.lerp2(1, 2, 0.5));
       }
