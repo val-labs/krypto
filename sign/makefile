@@ -18,3 +18,5 @@ lib%.a: %.a; cp $< $@ && cp $@ ..
 #include makefile.inc
 clean: ; rm -fr $(PROG) *sig
 
+signage.js: signage.cpp
+	docker run -v `pwd`:`pwd` -w `pwd` em emcc --bind -o $@ $< ../ed25519/ed25519/*.c ../ed25519/test2.c -s EXTRA_EXPORTED_RUNTIME_METHODS='["cwrap"]' -s LINKABLE=1 -s EXPORT_ALL=1
