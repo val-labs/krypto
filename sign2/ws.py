@@ -11,6 +11,7 @@ log=function(s,s2){ console.log(s2?arguments:s); };
 '''
 
 ContentType = dict(
+    py    = ('Content-Type', 'text/plain'),
     text  = ('Content-Type', 'text/plain'),
     html  = ('Content-Type', 'text/html'),
     js    = ('Content-Type', 'application/javascript'),
