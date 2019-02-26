@@ -52,30 +52,22 @@ const char* xsignit(unsigned char*plaintext){
   ed25519_sign(signature, plaintext, strlen((char*)plaintext),
 	       public_key, private_key);
   char*b = buf;
+  /*
   b += sprintf(b, "seed: ");
   XDUMP(seed, 32);
   b += sprintf(b, "prv1: ");
   b += sprintf(b, "prv2: ");
   XDUMP(private_key+32, 32);
+  */
   b += sprintf(b, "pubk: ");
   XDUMP(public_key, 32);
   b += sprintf(b, "sig1: ");
   XDUMP(signature, 32);
   b += sprintf(b, "sig2: ");
   XDUMP(signature+32, 32);
-  printf("XSIGNIT5[%s]\n", buf);
+  //printf("XSIGNIT5[%s]\n", buf);
   return buf;
 }
-
-
-
-
-
-
-
-
-
-
 
 void extract_lines(unsigned char *buf, int bytes, int lines, int M[]){
   M[0] = 0; M[lines] = bytes;
@@ -92,21 +84,16 @@ void scan_line(unsigned char*buf, int buf_len, unsigned char*out) {
 
 extern "C"
 int xverify(unsigned char*securetext){
-  //static char buf[1024];
-  //sprintf(buf, "hello, %s!", securetext);
-
-  printf("--xverify[%s]\n", securetext);
+  //printf("--xverify[%s]\n", securetext);
 
   int M[15] = {0};
-
-  //ed25519_create_keypair(public_key, private_key, seed);
 
   unsigned char*buf = securetext;
   int bytes = strlen((char*)buf);
   
   extract_lines(buf, bytes, 4, M);
 
-  printf("x--xverify[%s]\n", securetext);
+  //printf("x--xverify[%s]\n", securetext);
 
   scan_line(buf+M[0]+6, M[1]-M[0]-7, public_key);
   scan_line(buf+M[1]+6, M[2]-M[1]-7, signature+ 0);
@@ -116,11 +103,11 @@ int xverify(unsigned char*securetext){
   bytes = M[4] - M[3];
 
   if (!ed25519_verify(signature, buf, bytes, public_key)) {
-    printf("invalid signature\n");
+    //printf("invalid signature\n");
     return 0;
   }
   
-  printf("totally valid signature\n");
+  //printf("totally valid signature\n");
   return 1;
 }
 

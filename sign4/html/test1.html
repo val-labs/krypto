@@ -22,8 +22,8 @@
 	  hello2 = Module.cwrap('hello_to', 'string', ['string']);
 
 	  xsignit = Module.cwrap('xsignit', 'string', ['string']);
-	  xverify = Module.cwrap('xverify', 'int', ['string'])
-
+	  xverify = Module.cwrap('xverify', 'int', ['string']);
+	  
 	  outs(hello());
 	  outs(hello2("dude"));
 
@@ -31,10 +31,10 @@
 
 	  var m1 = "xyz\n";
 
-	  var s1 = xsignit(m1);
-	  outs("it's " + s1);
+	  var s0 = xsignit(m1);
+	  outs("it's " + s0);
 
-	  var sig = s1.split('\n').splice(2,4).join('\n');
+	  var sig = s0;
 	  outs("2it's " + sig);	  
 
 	  var s2 = xverify(sig +m1);
