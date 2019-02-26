@@ -15,11 +15,12 @@ ContentType = dict(
     text  = ('Content-Type', 'text/plain'),
     html  = ('Content-Type', 'text/html'),
     js    = ('Content-Type', 'application/javascript'),
+    wasm  = ('Content-Type', 'application/wasm'),
 )
 
 class App:
     
-    def wsgi(_, env, start):
+    def __call__(_, env, start):
         path = env['PATH_INFO'].replace('.','_').replace('/','GET_', 1)
         print("PATH:" + path)
         return getattr(_, path, _.not_found)(env, start)
@@ -54,10 +55,6 @@ class App:
         start('200 OK', [ContentType['html']])
         yield "INDEX2"
 
-    def xnot_found(_, env, start):
-        return not_found(start)
-
 if __name__ == '__main__':
     import bottle
-    bottle.run(app=App().wsgi)
-
+    bottle.run(app=App())
