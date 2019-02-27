@@ -1,5 +1,25 @@
 <!doctype html>
 <html>
+  <div>
+    <li>Seed:
+      <button onclick=setseed()>Enter Seed</button>
+      <button onclick=dumpseed()>Dump Seed</button>
+      <button onclick=createseed2()>Create Seed</button>
+      <button onclick=MyCats.newcat()>New Cat</button>
+      <button onclick=usecat(MyCats,"alice")>Alice Cat</button>
+      <button onclick=usecat(MyCats,"bob")  >Bobcat</button>
+      <button onclick=usecat(MyCats,"chuck")>Chuck Cat</button>
+      <button onclick=MyCats.dump()>Dump Cats</button>
+    </li>
+    <li>Public Key: <span id="publickey">???</span> </li>
+    <hr>
+    <textarea id="textarea" placeholder="blah . . ."></textarea><br>
+    <button onclick=meow()>Meow</button>
+    <button onclick=purr()>Purr</button>
+    <button onclick=hiss()>Hiss</button>
+    <button onclick=xclear()>Clear</button>
+  </div>
+  <div id="out"></div>
   <script>
     D=document;
     function GEBI(id){return D.getElementById(id);}
@@ -39,26 +59,33 @@
 	ws.onpub=function(e){console.log("onpub Not Yet Implemented");};
 	return ws;}
   </script>
-  <div>
-    <li>Seed:
-      <button onclick=setseed()>Enter Seed</button>
-      <button onclick=dumpseed()>Dump Seed</button>
-      <button onclick=createseed2()>Create Seed</button>
-      <button onclick=MyCats.newcat()>New Cat</button>
-      <button onclick=MyCats.usecat("alice")>Alice Cat</button>
-      <button onclick=MyCats.usecat("bob")>Bobcat</button>
-      <button onclick=MyCats.usecat("chuck")>Chuck Cat</button>
-      <button onclick=MyCats.dump()>Dump Cats</button>
-    </li>
-    <li>Public Key: <span id="publickey">???</span> </li>
-    <hr>
-    <textarea id="textarea" placeholder="blah . . ."></textarea><br>
-    <button onclick=meow()>Meow</button>
-    <button onclick=purr()>Purr</button>
-    <button onclick=hiss()>Hiss</button>
-    <button onclick=xclear()>Clear</button>
-  </div>
-  <div id="out"></div>
+  <script>
+    class CatWallet {
+	constructor(){
+	    this.cats = new Map()
+		.set('zero' ,{seed:padleft64("0")})
+		.set('alice',{seed:padleft64("1")})
+		.set('bob'  ,{seed:padleft64("2")})
+		.set('chuck',{seed:padleft64("3")});
+	    this.cats.forEach(function(v,k,a){
+		xsetseed(v.seed);
+		v.pubk = getpublic().substr(6, 64);
+		v.name = k;});}
+	findcat(publickey){
+	    for(var v of this.cats.values())
+		if(v.pubk == publickey)
+		    return v;}
+	newcat(){
+	    var pub = prompt("public key");
+	    var name = prompt("cat's nickname");
+	    this.cats.set(name, {"name":name, "pubk": pub});}
+	dump(){ console.log("CATS", this); }
+	get(name){ return this.cats.get(name); }
+	addCat(name){
+	    this.cats.set(name, {"name": name,
+				 "seed": getseed().substr(6, 64),
+				 "pubk": getpublic().substr(6, 64)});}};
+  </script>
   <script>
     var textarea = GEBI("textarea");
     var publickey = GEBI("publickey");
@@ -85,6 +112,9 @@
     function dumpseed(){
 	console.log(getseed());
     }
+    function displaypublic(){
+	publickey.innerText = getpublic();
+    }
     function createseed2(){
 	createseed();
 	displaypublic();
@@ -99,51 +129,10 @@
 	var name = prompt("cat's nickname?");
 	MyCats.addCat(name);
     }
-    function displaypublic(){
-	publickey.innerText = getpublic();
+    function usecat(cats, name){
+	xsetseed(cats.get(name).seed);
+	displaypublic();
     }
-  </script>
-  <script>
-    class CatWallet {
-	constructor(){
-	    this.cats = new Map()
-		.set('zero' ,{seed:padleft64("0")})
-		.set('alice',{seed:padleft64("1")})
-		.set('bob'  ,{seed:padleft64("2")})
-		.set('chuck',{seed:padleft64("3")});
-	    this.cats.forEach(function(v,k,a){
-		xsetseed(v.seed);
-		v.pubk = getpublic().substr(6, 64);
-		v.name = k;
-	    });
-	    this.usecat('zero');
-	}
-	findcat(publickey){
-	    for(var v of this.cats.values())
-		if(v.pubk == publickey)
-		    return v;
-	}
-	newcat(){
-	    var pub = prompt("public key");
-	    var name = prompt("cat's nickname");
-	    this.cats.set(name, {"name":name, "pubk": pub});
-	}
-	dump(){
-	    console.log("CATS", this);
-	}
-	usecat(name){
-	    console.log("USE CAT", name);
-	    console.log("USE CAT", this.cats.get(name));
-	    console.log("USE CAT", this.cats.get(name).seed);
-	    xsetseed(this.cats.get(name).seed);
-	    displaypublic();
-	}
-	addCat(name){
-	    this.cats.set(name, {"name": name,
-				 "seed": getseed().substr(6, 64),
-				 "pubk": getpublic().substr(6, 64)});
-	}
-    };
   </script>
   <script>
     var Module = {
@@ -159,6 +148,7 @@
 	    xverify     = Module.cwrap('xverify',     'int',    ['string']);
 
 	    MyCats = new CatWallet();
+	    usecat(MyCats, "zero");
 	    MyCats.dump();
 
 	    ws = connect();
