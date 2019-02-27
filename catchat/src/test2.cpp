@@ -140,9 +140,3 @@ int xverify(unsigned char*securetext){
   buf  += M[3]; bytes = M[4] - M[3];
   return(ed25519_verify(signature, buf, bytes, public_key));
 }
-
-//EMSCRIPTEN_BINDINGS(my_module) {
-  //function("lerp", &lerp);
-  //function("lerp2", &lerp2);
-  //function("forkOff", &forkOff);
-//}

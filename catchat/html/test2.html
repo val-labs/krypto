@@ -5,15 +5,49 @@
       <button onclick=setSeed()>Enter Seed</button>
       <button onclick=dumpSeed()>Dump Seed</button>
       <button onclick=createSeed2()>Create Seed</button>
+      <button onclick=usecat("alice")>Alice Cat</button>
+      <button onclick=usecat("bob")>Bobcat</button>
+      <button onclick=usecat("chuck")>Chuck Cat</button>
     </li>
     <li>whats your private
-      <button onclick=setPrivate()>Enter Private</button>
-      <button onclick=dumpPrivate()>Dump Private</button>
-    </li>
-    <li>whats your public
-      <span id="publickey">???</span>
-    </li>
+      <button onclick=dumpPrivate()>Dump Private</button></li>
+    <li>whats your public: <span id="publickey">???</span> </li>
+    <hr>
+    <textarea id="textarea" placeholder="blah . . ."></textarea><br>
+    <button onclick=meow()>MEOW</button>
+    <button onclick=purr()>PURR</button>
+    <button onclick=hiss()>HISS</button>
+    <button onclick=xclear()>CLEAR</button>
     <script>
+      function sendit(txt){
+	  var s0 = xsignit(txt);
+	  var msg = s0 + txt;
+	  console.log(msg);
+	  app.pub("main", msg);
+      }
+      function meow(){
+	  var textarea = GEBI("textarea");
+	  var txt = textarea.value;
+	  txt = "meow: " + txt;
+	  sendit(txt);
+      }
+      function purr(){
+	  var textarea = GEBI("textarea");
+	  var txt = textarea.value;
+	  txt = "purr: " + txt;
+	  sendit(txt);
+      }
+      function hiss(){
+	  var textarea = GEBI("textarea");
+	  var txt = textarea.value;
+	  txt = "hiss: " + txt;
+	  sendit(txt);
+      }
+      function xclear(){
+	  var textarea = GEBI("textarea");
+	  textarea.value='';
+	  textarea.focus();
+      }
       function createSeed2(){
 	  console.log(createSeed());
 	  setPublic();
@@ -64,6 +98,14 @@
 	var s4 = xverify("no way" + m1);
 	outs("it's " + s4);
 	outs("Qt's " + s9);
+    }
+    Cats = {};
+    Cats['alice']={seed:"0000000000000000000000000000000000000000000000000000000000000001"};
+    Cats['bob'  ]={seed:"0000000000000000000000000000000000000000000000000000000000000002"};
+    Cats['chuck']={seed:"0000000000000000000000000000000000000000000000000000000000000003"};
+    function usecat(name){
+	xsetseed(Cats[name].seed);
+	setPublic();
     }
     var Module = {
 	onRuntimeInitialized: function() {
@@ -119,10 +161,9 @@
   </script>
   <script>
     app.onpub=function(e){
-	outs("qI:" + app.myid);
-	outs("qC:" + e.channel);
-	outs("qD:" + e.data);
-	outs("qM:" + e.message);
+	outs("...I:" + app.myid);
+	outs("...C:" + e.channel);
+	outs("...M:" + e.message);
     };
   </script>
   <script src="test2.js"></script>
