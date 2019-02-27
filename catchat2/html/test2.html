@@ -2,24 +2,53 @@
 <html>
   <script>
     D=document;
-    function GEBI(id){
-	return D.getElementById(id);}
+    function GEBI(id){return D.getElementById(id);}
     function outs(s){
-	var tn = D.createTextNode(s);
 	var li = D.createElement("li");
-	li.appendChild(tn);
-	GEBI("out").appendChild(li);
-    }
+	li.appendChild(D.createTextNode(s));
+	GEBI("out").appendChild(li);}  
+    var zero8  = "00000000";
+    var zero16 = "0000000000000000";
+    var zero32 = zero16 + zero16;
+    var zero64 = zero32 + zero32;
+    function padleft8 (x){return((zero8 +x).substr(x.length, 8));}
+    function padleft16(x){return((zero16+x).substr(x.length,16));}
+    function padleft32(x){return((zero32+x).substr(x.length,32));}
+    function padleft64(x){return((zero64+x).substr(x.length,64));}
+  </script>
+  <script>
+    function connect(url){
+	// define onconnect and onpub as callbacks
+	var ws = new WebSocket(url || "wss://ccl.io/ps/");
+	ws.onopen =function(e){outs("OO");ws.onconnect(e);};
+	ws.onclose=function(e){outs("CC");};
+	ws.onerror=function(e){outs("EE");};
+	ws.onmessage=function(e){
+	    console.log(`Q1[${e.data}]ZZ`);
+	    var arr3 = e.data.split(";");
+	    e.ttl = arr3[0];
+	    e.channel = arr3[1];
+	    var arr4 = arr3.splice(2);
+	    e.message = arr4.join(";");
+	    if(!ws.myid) ws.myid = arr3[1];
+	    return ws.onpub(e);}
+	ws.sub = function(chn){    ws.send("0;+;"+chn);};
+	ws.unsub=function(chn){    ws.send("0;-;"+chn);};
+	ws.pub = function(chn,msg){ws.send("3;" + chn+";"+msg);};
+	ws.onconnect=function(e){console.log("onconnect Not Yet Implemented");};
+	ws.onpub=function(e){console.log("onpub Not Yet Implemented");};
+	return ws;}
   </script>
   <div>
     <li>Seed:
       <button onclick=setseed()>Enter Seed</button>
       <button onclick=dumpseed()>Dump Seed</button>
       <button onclick=createseed2()>Create Seed</button>
-      <button onclick=newcat()>New Cat</button>
-      <button onclick=usecat("alice")>Alice Cat</button>
-      <button onclick=usecat("bob")>Bobcat</button>
-      <button onclick=usecat("chuck")>Chuck Cat</button>
+      <button onclick=MyCats.newcat()>New Cat</button>
+      <button onclick=MyCats.usecat("alice")>Alice Cat</button>
+      <button onclick=MyCats.usecat("bob")>Bobcat</button>
+      <button onclick=MyCats.usecat("chuck")>Chuck Cat</button>
+      <button onclick=MyCats.dump()>Dump Cats</button>
     </li>
     <li>Public Key: <span id="publickey">???</span> </li>
     <hr>
@@ -37,71 +66,86 @@
     function meow(){
 	var txt = textarea.value;
 	txt = "meow: " + txt;
-	app.sendit(txt);
+	ws.sendit(txt);
     }
     function purr(){
 	var txt = textarea.value;
 	txt = "purr: " + txt;
-	app.sendit(txt);
+	ws.sendit(txt);
     }
     function hiss(){
 	var txt = textarea.value;
 	txt = "hiss: " + txt;
-	app.sendit(txt);
+	ws.sendit(txt);
     }
     function xclear(){
 	textarea.value='';
 	textarea.focus();
-    }
-    function addCat(name){
-	Cats[name] = {"name": name,
-		      "seed": getseed().substr(6, 64),
-		      "pubk": getpublic().substr(6, 64)};
-
     }
     function dumpseed(){
 	console.log(getseed());
     }
     function createseed2(){
 	createseed();
-	setpublic();
+	displaypublic();
 	var name = prompt("What's the name of this seed?");
-	addCat(name);
+	MyCats.addCat(name);
 
     }
     function setseed(){
 	var hex = prompt("What's your seed? (Hex format)");
 	xsetseed(hex);
-	setpublic();
+	displaypublic();
 	var name = prompt("cat's nickname?");
-	addCat(name);
+	MyCats.addCat(name);
     }
-    function setpublic(){
+    function displaypublic(){
 	publickey.innerText = getpublic();
     }
   </script>
   <script>
-    Cats = {};
-    Cats['zero' ]={seed:"0000000000000000000000000000000000000000000000000000000000000000"};
-    Cats['alice']={seed:"0000000000000000000000000000000000000000000000000000000000000001"};
-    Cats['bob'  ]={seed:"0000000000000000000000000000000000000000000000000000000000000002"};
-    Cats['chuck']={seed:"0000000000000000000000000000000000000000000000000000000000000003"};
-    function findcat(name){
-	for(var k in Cats){
-	    var v =  Cats[k];
-	    if(v.pubk == name)
-		return v;
+    class CatWallet {
+	constructor(){
+	    this.cats = new Map()
+		.set('zero' ,{seed:padleft64("0")})
+		.set('alice',{seed:padleft64("1")})
+		.set('bob'  ,{seed:padleft64("2")})
+		.set('chuck',{seed:padleft64("3")});
+	    this.cats.forEach(function(v,k,a){
+		xsetseed(v.seed);
+		v.pubk = getpublic().substr(6, 64);
+		v.name = k;
+	    });
+	    this.usecat('zero');
 	}
-    }
-    function newcat(){
-	var pub = prompt("public key");
-	var name = prompt("cat's nickname");
-	Cats[name] = {"name":name, "pubk": pub};
-    }
-    function usecat(name){
-	xsetseed(Cats[name].seed);
-	setpublic();
-    }
+	findcat(publickey){
+	    for(var v of this.cats.values())
+		if(v.pubk == publickey)
+		    return v;
+	}
+	newcat(){
+	    var pub = prompt("public key");
+	    var name = prompt("cat's nickname");
+	    this.cats.set(name, {"name":name, "pubk": pub});
+	}
+	dump(){
+	    console.log("CATS", this);
+	}
+	usecat(name){
+	    console.log("USE CAT", name);
+	    console.log("USE CAT", this.cats.get(name));
+	    console.log("USE CAT", this.cats.get(name).seed);
+	    xsetseed(this.cats.get(name).seed);
+	    displaypublic();
+	}
+	addCat(name){
+	    this.cats.set(name, {"name": name,
+				 "seed": getseed().substr(6, 64),
+				 "pubk": getpublic().substr(6, 64)});
+	}
+    };
+  </script>
+  <script>
     var Module = {
 	onRuntimeInitialized: function() {
 	    createseed  = Module.cwrap('createseed',  'void',   []);
@@ -113,61 +157,40 @@
 	    xsignitlong = Module.cwrap('xsignitlong', 'string', ['string']);
 	    xsignit     = Module.cwrap('xsignit',     'string', ['string']);
 	    xverify     = Module.cwrap('xverify',     'int',    ['string']);
-	    for(var k in Cats){
-		xsetseed(Cats[k].seed);
-		Cats[k].pubk = getpublic().substr(6, 64);
-		Cats[k].name = k;
-	    }
-	    usecat('zero');
-	    app = connect();
+
+	    MyCats = new CatWallet();
+	    MyCats.dump();
+
+	    ws = connect();
+	    ws.onconnect = function(e){
+		ws.sub("main");
+		ws.sub("weird");
+		var msg = "greeting: yo world";
+		ws.pub("main", xsignit(msg)+msg);
+	    };
+	    ws.onpub = function(e){
+		if(!xverify(e.message))
+		    return outs("ERRANT PACKET:" + e.message);
+		var from = e.message.substr(6, 64);
+		var payload = e.message.split('\n').splice(3);
+		var cat = MyCats.findcat(from);
+		console.log("CAT", cat);
+		if(cat){
+		    outs(`AWESOME:${cat.name}:${payload}`);
+		}else{
+		    outs(`COOL:${from.substr(6)}...:${payload}`);
+		}
+	    };
+	    ws.sendit = function(txt){
+		var s0 = xsignit(txt);
+		var msg = s0 + txt;
+		console.log(msg);
+		var s2 = xverify(msg);
+		outs("xverify" + s2);
+		ws.pub("main", msg);
+	    };
 	}
     };
-    function connect(url){
-	var app = new WebSocket(url || "wss://ccl.io/ps/");
-	app.onopen =function(e){outs("OO");
-				app.state=0;app.onconnect(e);};
-	app.onclose=function(e){outs("CC");};
-	app.onerror=function(e){outs("EE");};
-	app.onmessage=function(e){
-	    var arr = e.data.split(";", 3);
-	    console.log("QQQ2", arr, "ZZZ");
-	    e.ttl = arr[0];
-	    e.channel = arr[1];
-	    e.message = arr[2];
-	    if(!app.myid)
-		app.myid = arr[1];
-	    return app.onpub(e);}
-	app.sub = function(chn){    app.send("0;+;"+chn);};
-	app.unsub=function(chn){    app.send("0;-;"+chn);};
-	app.pub = function(chn,msg){app.send("3;" + chn+";"+msg);};
-	app.onconnect=function(e){
-	    app.sub("main");
-	    app.sub("weird");
-	    var msg = "greeting: yo world";
-	    app.pub("main", xsignit(msg)+msg);
-	};
-	app.onpub=function(e){
-	    if(!xverify(e.message))
-		return outs("ERRANT PACKET:" + e.message);
-	    var from = e.message.substr(6, 64);
-	    var payload = e.message.split('\n').splice(3);
-	    var cat = findcat(from);
-	    console.log("CAT", cat);
-	    if(cat){
-		outs(`AWESOME:${cat.name}:${payload}`);
-	    }else{
-		outs(`COOL:${from.substr(6)}...:${payload}`);
-	    }
-	};
-	app.sendit = function(txt){
-	    var s0 = xsignit(txt);
-	    var msg = s0 + txt;
-	    console.log(msg);
-	    var s2 = xverify(msg);
-	    outs("xverify" + s2);
-	    app.pub("main", msg);
-	};
-	return app;}
   </script>
   <script src="test2.js"></script>
 </html>

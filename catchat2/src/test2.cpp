@@ -115,7 +115,7 @@ unsigned char*getpublic(){
 
 extern "C"
 int xsetseed(unsigned char*newseed){
-  printf("xsetseed(%s)\n", newseed);
+  //printf("xsetseed(%s)\n", newseed);
   scan_line(newseed, 64, seed);
   ed25519_create_keypair(public_key, private_key, seed);
   return 1;
@@ -123,7 +123,7 @@ int xsetseed(unsigned char*newseed){
 
 extern "C"
 int xsetprivate(unsigned char*privatekey){
-  printf("xsetprivate(%s)\n", privatekey);
+  //printf("xsetprivate(%s)\n", privatekey);
   scan_line(privatekey, 128, private_key);
   return 1;
 }
