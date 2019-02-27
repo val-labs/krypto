@@ -2,7 +2,8 @@
 <html>
   <div>
     <li>Controls:
-      <input type=checkbox id="usehtml" checked>HTML Output
+      <input type=checkbox id="usehtml" checked>HTML Output<br>
+      <input type=checkbox id="erase"   checked>Erase on Send
     </li>
     <li>Seed:
       <button onclick=setseed()>Enter Seed</button>
@@ -195,8 +196,9 @@
 		var msg = s0 + txt;
 		console.log(msg);
 		var s2 = xverify(msg);
-		outt("xverify" + s2);
+		console.log("xverify" + s2);
 		ws.pub("main", msg);
+		if(GEBI("erase").checked) textarea.value = '';
 	    };
 	}
     };
