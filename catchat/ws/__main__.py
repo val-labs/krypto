@@ -22,7 +22,6 @@ class App:
     
     def __call__(_, env, start):
         path = env['PATH_INFO'].replace('.','_').replace('/','GET_', 1)
-        print("PATH:" + path)
         return getattr(_, path, _.not_found)(env, start)
 
     def error404(_, env, start):
