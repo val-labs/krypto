@@ -2,7 +2,7 @@
 <html>
   <div>
     <li>Controls:
-      <input type="checkbox" id="usehtml">HTML Output
+      <input type=checkbox id="usehtml" checked>HTML Output
     </li>
     <li>Seed:
       <button onclick=setseed()>Enter Seed</button>
@@ -169,8 +169,23 @@
 		var payload = e.message.split('\n').splice(3);
 		var cat = MyCats.findcat(from);
 		console.log("CAT", cat);
+		console.log("PAY", payload);
+		//var msg = payload[0];
+		var msg = payload.join("<br>");
 		if(cat){
-		    outstr(`AWESOME:${cat.name}:${payload}`);
+		    if(msg.startsWith("meow: ")){
+			console.log("MEOW MEOW MEOW");
+			outstr(`<hr><h2>${cat.name} meows</h2><hr>${msg.substr(5)}`);
+		    }else if(msg.startsWith("hiss: ")){
+			console.log("HISS HISS HISS");
+			outstr(`<hr><h2>${cat.name} hisses</h2><hr>${msg.substr(5)}`);
+		    }else if(msg.startsWith("purr: ")){
+			console.log("PURR PURR PURR");
+			outstr(`<hr><h2>${cat.name} purrs</h2><hr>${msg.substr(5)}`);
+		    }else{
+			console.log("I HAVE NO IDEA WHAT TYPE OF PACKAGE THIS IS");
+			outstr(`<hr><h2>${cat.name} UNKNOWN</h2><hr>${msg}`);
+		    }
 		}else{
 		    outstr(`COOL:${from.substr(6)}...:${payload}`);
 		}
