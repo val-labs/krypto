@@ -4,6 +4,7 @@
     <li>whats your seed
       <button onclick=setSeed()>Enter Seed</button>
       <button onclick=dumpSeed()>Dump Seed</button>
+      <button onclick=createSeed2()>Create Seed</button>
     </li>
     <li>whats your private
       <button onclick=setPrivate()>Enter Private</button>
@@ -11,33 +12,30 @@
     </li>
     <li>whats your public
       <span id="publickey">???</span>
-      <button onclick=dumpPublic()>Dump Public</button>
     </li>
     <script>
+      function createSeed2(){
+	  console.log(createSeed());
+	  setPublic();
+      }
       function dumpSeed(){
 	  console.log(getSeed());
       }
       function dumpPrivate(){
 	  console.log(getPrivate());
       }
-      function dumpPublic(){
-	  console.log(getPublic());
-      }
       function setSeed(){
-	  console.log("enter seed");
 	  var inp = prompt("What's your seed? (Hex format)");
-	  console.log(inp);
-	  console.log("how does the seed get set?");
 	  var r = xsetseed(inp);
 	  console.log("r", r);
       }
       function setPrivate(){
-	  console.log("enter private");
 	  var inp = prompt("What's your private key? (Hex format)");
-	  console.log(inp);
-	  console.log("how does the private key get set?");
 	  var r = xsetprivate(inp);
 	  console.log("r", r);
+      }
+      function setPublic(){
+	  GEBI("publickey").innerText = getPublic();
       }
     </script>
   </div>
@@ -69,6 +67,7 @@
     }
     var Module = {
 	onRuntimeInitialized: function() {
+	    createSeed  = Module.cwrap('createSeed',  'void',   []);
 	    getSeed     = Module.cwrap('getSeed',     'string', []);
 	    getPublic   = Module.cwrap('getPublic',   'string', []);
 	    getPrivate  = Module.cwrap('getPrivate',  'string', []);
@@ -77,8 +76,9 @@
 	    xsignitlong = Module.cwrap('xsignitlong', 'string', ['string']);
 	    xsignit     = Module.cwrap('xsignit',     'string', ['string']);
 	    xverify     = Module.cwrap('xverify',     'int',    ['string']);
+	    xsetseed("0000000000000000000000000000000000000000000000000000000000000000");
 	    testKeys();
-	    GEBI("publickey").innerText = getPublic();
+	    setPublic();
 	}
     };
   </script>

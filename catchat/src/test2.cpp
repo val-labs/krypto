@@ -6,43 +6,13 @@ extern "C" {
 #include<stdio.h>
 
 using namespace emscripten;
-/*
-float lerp(float a, float b, float t) {
-    return (1 - t) * a + t * b;
-}
 
-float lerp2(float a, float b, float t) {
-    return (1 - t) * a + t * b;
-}
-*/
-/*
-void forkOff(int s,int y) {
-  printf("WOO HOO! [%d], %d\n", s, y);
-  return;
-}
-
-extern "C"
-const char* hello_world(){
-  return "hello, world!";
-}
-*/
 unsigned char public_key[32], private_key[64], seed[32]="";
 unsigned char signature[64];
 
 unsigned char public_hex_key[64], private_hex_key[128], hex_seed[64]="";
 unsigned char hex_signature[128];
-/*
-extern "C"
-const char* hello_to(char*who){
-  static char buf[1024];
-  sprintf(buf, "hello, %s!", who);
-  ed25519_create_keypair(public_key,
-			 private_key,
-			 seed);
-  printf("hello to\n");
-  return buf;
-}
-*/
+
 #define DUMP(s,m)				\
     for(int n=0;n<m;n++)			\
       printf("%02x", s[n]),			\
@@ -60,20 +30,12 @@ const char* xsignit(unsigned char*plaintext){
   ed25519_sign(signature, plaintext, strlen((char*)plaintext),
 	       public_key, private_key);
   char*b = buf;
-  /*
-  b += sprintf(b, "seed: ");
-  XDUMP(seed, 32);
-  b += sprintf(b, "prv1: ");
-  b += sprintf(b, "prv2: ");
-  XDUMP(private_key+32, 32);
-  */
   b += sprintf(b, "pubk: ");
   XDUMP(public_key, 32);
   b += sprintf(b, "sig1: ");
   XDUMP(signature, 32);
   b += sprintf(b, "sig2: ");
   XDUMP(signature+32, 32);
-  //printf("XSIGNIT5[%s]\n", buf);
   return buf;
 }
 
@@ -123,7 +85,6 @@ unsigned char*getSeed(){
 extern "C"
 unsigned char*getPrivate(){
   char*b = (char*)private_hex_key;
-  ed25519_create_keypair(public_key, private_key, seed);
   b += sprintf(b, "prv1: ");
   XDUMP(private_key, 32);
   b += sprintf(b, "prv2: ");
@@ -132,9 +93,21 @@ unsigned char*getPrivate(){
 }
 
 extern "C"
+void createSeed(){
+  ed25519_create_seed(seed);
+  printf(" * seed\n");
+  DUMP(seed, 32);
+
+  ed25519_create_keypair(public_key, private_key, seed);
+  printf(" * private key\n");
+  DUMP(private_key, 64);
+  printf(" * public key\n");
+  DUMP(public_key, 32);
+}
+
+extern "C"
 unsigned char*getPublic(){
   char*b = (char*)public_hex_key;
-  ed25519_create_keypair(public_key, private_key, seed);
   b += sprintf(b, "pubk: ");
   XDUMP(public_key, 32);
   return public_hex_key;
