@@ -53,12 +53,7 @@
 	textarea.value='';
 	textarea.focus();
     }
-    function createSeed2(){
-	createSeed();
-
-	setPublic();
-	var name = prompt("What's the name of this seed?");
-
+    function addCat(name){
 	Cats[name] = {"name": name,
 		      "seed": getSeed().substr(6, 64),
 		      "pubk": getPublic().substr(6, 64)};
@@ -67,16 +62,19 @@
     function dumpSeed(){
 	console.log(getSeed());
     }
+    function createSeed2(){
+	createSeed();
+	setPublic();
+	var name = prompt("What's the name of this seed?");
+	addCat(name);
+
+    }
     function setSeed(){
 	var hex = prompt("What's your seed? (Hex format)");
-	var r = xsetseed(hex);
-	
+	xsetseed(hex);
 	setPublic();
 	var name = prompt("cat's nickname?");
-
-	Cats[name] = {"name": name,
-		      "seed": getSeed().substr(6, 64),
-		      "pubk": getPublic().substr(6, 64)};
+	addCat(name);
     }
     function setPublic(){
 	publickey.innerText = getPublic();
