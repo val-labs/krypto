@@ -1,80 +1,25 @@
 <!doctype html>
 <html>
   <div>
-    <li>whats your seed
+    <li>Seed:
       <button onclick=setSeed()>Enter Seed</button>
       <button onclick=dumpSeed()>Dump Seed</button>
       <button onclick=createSeed2()>Create Seed</button>
+      <button onclick=newcat()>New Cat</button>
       <button onclick=usecat("alice")>Alice Cat</button>
       <button onclick=usecat("bob")>Bobcat</button>
       <button onclick=usecat("chuck")>Chuck Cat</button>
     </li>
-    <li>whats your private
-      <button onclick=dumpPrivate()>Dump Private</button></li>
-    <li>whats your public: <span id="publickey">???</span> </li>
+    <li>Public Key: <span id="publickey">???</span> </li>
     <hr>
     <textarea id="textarea" placeholder="blah . . ."></textarea><br>
-    <button onclick=meow()>MEOW</button>
-    <button onclick=purr()>PURR</button>
-    <button onclick=hiss()>HISS</button>
-    <button onclick=xclear()>CLEAR</button>
-    <script>
-      function sendit(txt){
-	  var s0 = xsignit(txt);
-	  var msg = s0 + txt;
-	  console.log(msg);
-	  app.pub("main", msg);
-      }
-      function meow(){
-	  var textarea = GEBI("textarea");
-	  var txt = textarea.value;
-	  txt = "meow: " + txt;
-	  sendit(txt);
-      }
-      function purr(){
-	  var textarea = GEBI("textarea");
-	  var txt = textarea.value;
-	  txt = "purr: " + txt;
-	  sendit(txt);
-      }
-      function hiss(){
-	  var textarea = GEBI("textarea");
-	  var txt = textarea.value;
-	  txt = "hiss: " + txt;
-	  sendit(txt);
-      }
-      function xclear(){
-	  var textarea = GEBI("textarea");
-	  textarea.value='';
-	  textarea.focus();
-      }
-      function createSeed2(){
-	  console.log(createSeed());
-	  setPublic();
-      }
-      function dumpSeed(){
-	  console.log(getSeed());
-      }
-      function dumpPrivate(){
-	  console.log(getPrivate());
-      }
-      function setSeed(){
-	  var inp = prompt("What's your seed? (Hex format)");
-	  var r = xsetseed(inp);
-	  console.log("r", r);
-      }
-      function setPrivate(){
-	  var inp = prompt("What's your private key? (Hex format)");
-	  var r = xsetprivate(inp);
-	  console.log("r", r);
-      }
-      function setPublic(){
-	  GEBI("publickey").innerText = getPublic();
-      }
-    </script>
+    <button onclick=meow()>Meow</button>
+    <button onclick=purr()>Purr</button>
+    <button onclick=hiss()>Hiss</button>
+    <button onclick=xclear()>Clear</button>
   </div>
   <div id="out"></div>
-  <script>    
+  <script>
     D=document;
     function GEBI(id){
 	return D.getElementById(id);}
@@ -84,28 +29,93 @@
 	li.appendChild(tn);
 	GEBI("out").appendChild(li);
     }
-    function testKeys() {
-	var m1 = "xyz\n";
-	var s0 = xsignit(m1);
-	var s9 = xsignitlong(m1);
-	outs("it's " + s0);
-	var sig = s0;
-	outs("2it's " + sig);	  
-	var s2 = xverify(sig +m1);
+
+    var textarea = GEBI("textarea");
+    var publickey = GEBI("publickey");
+
+    function newcat(){
+	var pub = prompt("public key");
+	var name = prompt("cat's nickname");
+	Cats[name] = {"name":name, "pubk": pub};
+	console.log(Cats);
+    }
+    function sendit(txt){
+	var s0 = xsignit(txt);
+	var msg = s0 + txt;
+	console.log(msg);
+	var s2 = xverify(msg);
 	outs("it's " + s2);
-	var s3 = xverify(sig + "wrong");
-	outs("it's " + s3);
-	var s4 = xverify("no way" + m1);
-	outs("it's " + s4);
-	outs("Qt's " + s9);
+	app.pub("main", msg);
+    }
+    function meow(){
+	var txt = textarea.value;
+	txt = "meow: " + txt;
+	sendit(txt);
+    }
+    function purr(){
+	var txt = textarea.value;
+	txt = "purr: " + txt;
+	sendit(txt);
+    }
+    function hiss(){
+	var txt = textarea.value;
+	txt = "hiss: " + txt;
+	sendit(txt);
+    }
+    function xclear(){
+	textarea.value='';
+	textarea.focus();
+    }
+    function createSeed2(){
+	createSeed();
+
+	setPublic();
+	var name = prompt("What's the name of this seed?");
+	console.log(name);
+	Cats[name] = {"name": name,
+		      "seed": getSeed().substr(6, 64),
+		      "pubk": getPublic().substr(6, 64)};
+	console.log(Cats);
+    }
+    function dumpSeed(){
+	console.log(getSeed());
+    }
+    function setSeed(){
+	var hex = prompt("What's your seed? (Hex format)");
+	var r = xsetseed(hex);
+	console.log("r", r);
+	
+	setPublic();
+	var name = prompt("cat's nickname?");
+	console.log(name);
+	Cats[name] = {"name": name,
+		      "seed": getSeed().substr(6, 64),
+		      "pubk": getPublic().substr(6, 64)};
+	console.log(Cats);
+    }
+    function setPublic(){
+	publickey.innerText = getPublic();
     }
     Cats = {};
+    Cats['zero' ]={seed:"0000000000000000000000000000000000000000000000000000000000000000"};
     Cats['alice']={seed:"0000000000000000000000000000000000000000000000000000000000000001"};
     Cats['bob'  ]={seed:"0000000000000000000000000000000000000000000000000000000000000002"};
     Cats['chuck']={seed:"0000000000000000000000000000000000000000000000000000000000000003"};
     function usecat(name){
 	xsetseed(Cats[name].seed);
 	setPublic();
+    }
+    function findcat(name){
+	console.log(`findcat(${name})`);
+	for(var k in Cats){
+	    var v =  Cats[k];
+	    var pubk = v.pubk;
+	    if(pubk == name){
+		console.log("SUCCESS");
+		return v;
+	    }
+	}
+	console.log("FAILURE");
     }
     var Module = {
 	onRuntimeInitialized: function() {
@@ -118,22 +128,26 @@
 	    xsignitlong = Module.cwrap('xsignitlong', 'string', ['string']);
 	    xsignit     = Module.cwrap('xsignit',     'string', ['string']);
 	    xverify     = Module.cwrap('xverify',     'int',    ['string']);
-	    xsetseed("0000000000000000000000000000000000000000000000000000000000000000");
-	    testKeys();
-	    setPublic();
+	    for(var k in Cats){
+		xsetseed(Cats[k].seed);
+		var pub2 = getPublic();
+		pub2 = pub2.substr(6);
+		pub2 = pub2.substr(0, pub2.length-1);
+		Cats[k].pubk = pub2;	
+		Cats[k].name = k;
+	    }
+	    usecat('zero');
+	    console.log(Cats);
+	    app = connect();
 	}
     };
-  </script>
-  <script>
-    function connect(){
-	var loc = "wss://ccl.io/ps/";
-	var app = new WebSocket(loc);
+    function connect(url){
+	var app = new WebSocket(url || "wss://ccl.io/ps/");
 	app.onopen =function(e){outs("OO");
 				app.state=0;app.onconnect(e);};
 	app.onclose=function(e){outs("CC");};
 	app.onerror=function(e){outs("EE");};
 	app.onmessage=function(e){
-	    console.log("QQQ1", e.data, "ZZZ");
 	    var arr = e.data.split(";", 3);
 	    console.log("QQQ2", arr, "ZZZ");
 	    e.ttl = arr[0];
@@ -148,23 +162,23 @@
 	app.onconnect=function(e){
 	    app.sub("main");
 	    app.sub("weird");
-	    app.pub("main", "yo world");
+	    var msg = "greeting: yo world";
+	    app.pub("main", xsignit(msg)+msg);
 	};
 	app.onpub=function(e){
-	    outs("I:" + app.myid);
-	    outs("C:" + e.channel);
-	    outs("D:" + e.data);
-	    outs("M:" + e.message);
+	    if(!xverify(e.message))
+		return outs("ERRANT PACKET:" + e.message);
+	    var from = e.message.substr(6, 64);
+	    var payload = e.message.split('\n').splice(3);
+	    var cat = findcat(from);
+	    console.log("CAT", cat);
+	    if(cat){
+		outs(`AWESOME PACKET:${cat.name}:${payload}`);
+	    }else{
+		outs(`PRETTY COOL PACKET:${from.substr(6)}:${payload}`);
+	    }
 	};
 	return app;}
-    app = connect();
-  </script>
-  <script>
-    app.onpub=function(e){
-	outs("...I:" + app.myid);
-	outs("...C:" + e.channel);
-	outs("...M:" + e.message);
-    };
   </script>
   <script src="test2.js"></script>
 </html>
