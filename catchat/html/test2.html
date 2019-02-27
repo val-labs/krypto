@@ -1,5 +1,16 @@
 <!doctype html>
 <html>
+  <script>
+    D=document;
+    function GEBI(id){
+	return D.getElementById(id);}
+    function outs(s){
+	var tn = D.createTextNode(s);
+	var li = D.createElement("li");
+	li.appendChild(tn);
+	GEBI("out").appendChild(li);
+    }
+  </script>
   <div>
     <li>Seed:
       <button onclick=setSeed()>Enter Seed</button>
@@ -20,47 +31,23 @@
   </div>
   <div id="out"></div>
   <script>
-    D=document;
-    function GEBI(id){
-	return D.getElementById(id);}
-    function outs(s){
-	var tn = D.createTextNode(s);
-	var li = D.createElement("li");
-	li.appendChild(tn);
-	GEBI("out").appendChild(li);
-    }
-
     var textarea = GEBI("textarea");
     var publickey = GEBI("publickey");
 
-    function newcat(){
-	var pub = prompt("public key");
-	var name = prompt("cat's nickname");
-	Cats[name] = {"name":name, "pubk": pub};
-	console.log(Cats);
-    }
-    function sendit(txt){
-	var s0 = xsignit(txt);
-	var msg = s0 + txt;
-	console.log(msg);
-	var s2 = xverify(msg);
-	outs("it's " + s2);
-	app.pub("main", msg);
-    }
     function meow(){
 	var txt = textarea.value;
 	txt = "meow: " + txt;
-	sendit(txt);
+	app.sendit(txt);
     }
     function purr(){
 	var txt = textarea.value;
 	txt = "purr: " + txt;
-	sendit(txt);
+	app.sendit(txt);
     }
     function hiss(){
 	var txt = textarea.value;
 	txt = "hiss: " + txt;
-	sendit(txt);
+	app.sendit(txt);
     }
     function xclear(){
 	textarea.value='';
@@ -71,11 +58,11 @@
 
 	setPublic();
 	var name = prompt("What's the name of this seed?");
-	console.log(name);
+
 	Cats[name] = {"name": name,
 		      "seed": getSeed().substr(6, 64),
 		      "pubk": getPublic().substr(6, 64)};
-	console.log(Cats);
+
     }
     function dumpSeed(){
 	console.log(getSeed());
@@ -83,39 +70,39 @@
     function setSeed(){
 	var hex = prompt("What's your seed? (Hex format)");
 	var r = xsetseed(hex);
-	console.log("r", r);
 	
 	setPublic();
 	var name = prompt("cat's nickname?");
-	console.log(name);
+
 	Cats[name] = {"name": name,
 		      "seed": getSeed().substr(6, 64),
 		      "pubk": getPublic().substr(6, 64)};
-	console.log(Cats);
     }
     function setPublic(){
 	publickey.innerText = getPublic();
     }
+  </script>
+  <script>
     Cats = {};
     Cats['zero' ]={seed:"0000000000000000000000000000000000000000000000000000000000000000"};
     Cats['alice']={seed:"0000000000000000000000000000000000000000000000000000000000000001"};
     Cats['bob'  ]={seed:"0000000000000000000000000000000000000000000000000000000000000002"};
     Cats['chuck']={seed:"0000000000000000000000000000000000000000000000000000000000000003"};
+    function findcat(name){
+	for(var k in Cats){
+	    var v =  Cats[k];
+	    if(v.pubk == name)
+		return v;
+	}
+    }
+    function newcat(){
+	var pub = prompt("public key");
+	var name = prompt("cat's nickname");
+	Cats[name] = {"name":name, "pubk": pub};
+    }
     function usecat(name){
 	xsetseed(Cats[name].seed);
 	setPublic();
-    }
-    function findcat(name){
-	console.log(`findcat(${name})`);
-	for(var k in Cats){
-	    var v =  Cats[k];
-	    var pubk = v.pubk;
-	    if(pubk == name){
-		console.log("SUCCESS");
-		return v;
-	    }
-	}
-	console.log("FAILURE");
     }
     var Module = {
 	onRuntimeInitialized: function() {
@@ -130,14 +117,10 @@
 	    xverify     = Module.cwrap('xverify',     'int',    ['string']);
 	    for(var k in Cats){
 		xsetseed(Cats[k].seed);
-		var pub2 = getPublic();
-		pub2 = pub2.substr(6);
-		pub2 = pub2.substr(0, pub2.length-1);
-		Cats[k].pubk = pub2;	
+		Cats[k].pubk = getPublic().substr(6, 64);
 		Cats[k].name = k;
 	    }
 	    usecat('zero');
-	    console.log(Cats);
 	    app = connect();
 	}
     };
@@ -173,10 +156,18 @@
 	    var cat = findcat(from);
 	    console.log("CAT", cat);
 	    if(cat){
-		outs(`AWESOME PACKET:${cat.name}:${payload}`);
+		outs(`AWESOME:${cat.name}:${payload}`);
 	    }else{
-		outs(`PRETTY COOL PACKET:${from.substr(6)}:${payload}`);
+		outs(`COOL:${from.substr(6)}...:${payload}`);
 	    }
+	};
+	app.sendit = function(txt){
+	    var s0 = xsignit(txt);
+	    var msg = s0 + txt;
+	    console.log(msg);
+	    var s2 = xverify(msg);
+	    outs("xverify" + s2);
+	    app.pub("main", msg);
 	};
 	return app;}
   </script>
