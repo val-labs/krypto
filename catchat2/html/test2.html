@@ -28,7 +28,7 @@
     D=document;
     function GEBI(id){return D.getElementById(id);}
     function outt(s){GEBI("out").appendChild(D.createElement("li")).appendChild(D.createTextNode(s));}
-    function outh(s){GEBI("out").appendChild(D.createElement("li")).innerHTML=s;}
+    function outh(s){GEBI("out").appendChild(D.createElement("div")).innerHTML=s;}
     function outstr(s){if(GEBI("usehtml").checked) outh(s); else outt(s);}
     var zero8  = "00000000";
     var zero16 = "0000000000000000";
@@ -43,9 +43,9 @@
     function connect(url){
 	// define onconnect and onpub as callbacks
 	var ws = new WebSocket(url || "wss://ccl.io/ps/");
-	ws.onopen =function(e){outt("OO");ws.onconnect(e);};
-	ws.onclose=function(e){outt("CC");};
-	ws.onerror=function(e){outt("EE");};
+	ws.onopen =function(e){outt("PubSub Cxn Opened");ws.onconnect(e);};
+	ws.onclose=function(e){outt("PubSub Cxn Closed");};
+	ws.onerror=function(e){outt("PubSub Cxn Error");};
 	ws.onmessage=function(e){
 	    console.log(`Q1[${e.data}]ZZ`);
 	    var arr3 = e.data.split(";");
@@ -74,6 +74,8 @@
 		xsetseed(v.seed);
 		v.pubk = getpublic().substr(6, 64);
 		v.name = k;});}
+	dump(){ console.log("CATS", this);     }
+	get(name){ return this.cats.get(name); }
 	findcat(publickey){
 	    for(var v of this.cats.values())
 		if(v.pubk == publickey)
@@ -82,10 +84,6 @@
 	    var pub = prompt("public key");
 	    var name = prompt("cat's nickname");
 	    this.cats.set(name, {"name":name, "pubk": pub});}
-	dump(){
-	    console.log("CATS", this);
-	}
-	get(name){ return this.cats.get(name); }
 	addCat(name){
 	    this.cats.set(name, {"name": name,
 				 "seed": getseed().substr(6, 64),
@@ -167,29 +165,18 @@
 		if(!xverify(e.message))
 		    return outt("ERRANT PACKET:" + e.message);
 		var from = e.message.substr(6, 64);
-		var payload = e.message.split('\n').splice(3);
+		var pay = e.message.split('\n').splice(3).join("<br>");
 		var cat = MyCats.findcat(from);
 		console.log("CAT", cat);
-		console.log("PAY", payload);
-		//var msg = payload[0];
-		var msg = payload.join("<br>");
-		if(cat){
-		    if(msg.startsWith("meow: ")){
-			console.log("MEOW MEOW MEOW");
-			outstr(`<hr><h2>${cat.name} meows</h2><hr>${msg.substr(5)}`);
-		    }else if(msg.startsWith("hiss: ")){
-			console.log("HISS HISS HISS");
-			outstr(`<hr><h2>${cat.name} hisses</h2><hr>${msg.substr(5)}`);
-		    }else if(msg.startsWith("purr: ")){
-			console.log("PURR PURR PURR");
-			outstr(`<hr><h2>${cat.name} purrs</h2><hr>${msg.substr(5)}`);
-		    }else{
-			console.log("I HAVE NO IDEA WHAT TYPE OF PACKAGE THIS IS");
-			outstr(`<hr><h2>${cat.name} UNKNOWN</h2><hr>${msg}`);
-		    }
-		}else{
-		    outstr(`COOL:${from.substr(6)}...:${payload}`);
-		}
+		console.log("PAY", pay);
+		function mkMessage(verb, msg){
+		    outstr(`<hr><h2>${cat.name} ${verb}</h2>` +
+			   `<div style="width:50%"><hr></div>${msg}`);}
+		if(!cat)   outstr(`anonymous ${from.substr(6)}<hr>${pay}`);
+		else if(pay.startsWith("meow: "))mkMessage("meows", pay.substr(5));
+		else if(pay.startsWith("hiss: "))mkMessage("hisses",pay.substr(5));
+		else if(pay.startsWith("purr: "))mkMessage("purrs", pay.substr(5));
+		else                             mkMessage("UNKNOWN", pay);
 	    };
 	    ws.sendit = function(txt){
 		var s0 = xsignit(txt);
