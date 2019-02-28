@@ -1,11 +1,5 @@
 <!doctype html>
 <html>
-  <style>
-    .hr2 {width: 50%;}
-    .post {
-	border: 1px solid blue;
-    }
-  </style>
   <div>
     <li>Controls:
       <input type=checkbox id="usehtml" checked>HTML Output<br>
@@ -14,7 +8,7 @@
     <li>Seed:
       <button onclick=setseed()>Enter Seed</button>
       <button onclick=dumpseed()>Dump Seed</button>
-      <button onclick=createseed2()>Create Seed</button>
+      <button onclick=createSeed()>Create Seed</button>
       <button onclick=MyCats.newcat()>New Cat</button>
       <button onclick=usecat(MyCats,"alice")>Alice Cat</button>
       <button onclick=usecat(MyCats,"bob")  >Bobcat</button>
@@ -23,7 +17,9 @@
     </li>
     <li>Public Key: <span id="publickey">???</span> </li>
     <hr>
-    <textarea id="textarea" placeholder="blah . . ."></textarea><br>
+    <textarea id="textarea" placeholder="blah . . ."
+	      style="width: 100%" rows=5
+	      ></textarea><br>
     <button onclick=meow()>Meow</button>
     <button onclick=purr()>Purr</button>
     <button onclick=hiss()>Hiss</button>
@@ -33,14 +29,13 @@
   <script>
     D=document;
     function GEBI(id){return D.getElementById(id);}
-    function outt(s){GEBI("out").appendChild(D.createElement("li")).appendChild(D.createTextNode(s));}
-//    function outh(s){GEBI("out").appendChild(D.createElement("div")).innerHTML=s;}
+    function outt(s){GEBI("out").appendChild(D.createElement("li"))
+		     .appendChild(D.createTextNode(s));}
     function outh(s){
 	var d = D.createElement("div");
-	d.className = "post";
+	d.style = "border: 1px solid red";
 	var e = GEBI("out").appendChild(d);
-	e.innerHTML = s;
-    }
+	e.innerHTML = s;}
     function outstr(s){if(GEBI("usehtml").checked) outh(s); else outt(s);}
     var zero8  = "00000000";
     var zero16 = "0000000000000000";
@@ -104,50 +99,24 @@
   <script>
     var textarea = GEBI("textarea");
     var publickey = GEBI("publickey");
-
-    function meow(){
-	var txt = textarea.value;
-	txt = "meow: " + txt;
-	ws.sendit(txt);
-    }
-    function purr(){
-	var txt = textarea.value;
-	txt = "purr: " + txt;
-	ws.sendit(txt);
-    }
-    function hiss(){
-	var txt = textarea.value;
-	txt = "hiss: " + txt;
-	ws.sendit(txt);
-    }
-    function xclear(){
-	textarea.value='';
-	textarea.focus();
-    }
-    function dumpseed(){
-	console.log(getseed());
-    }
-    function displaypublic(){
-	publickey.innerText = getpublic();
-    }
-    function createseed2(){
+    function meow(){ws.sendit("meow: " + textarea.value);}
+    function purr(){ws.sendit("purr: " + textarea.value);}
+    function hiss(){ws.sendit("hiss: " + textarea.value);}
+    function xclear(){textarea.value='';textarea.focus();}
+    function dumpseed(){	console.log(getseed());  }
+    function displaypublic(){publickey.innerText=getpublic();}
+    function usecat(cats,name){xsetseed(cats.get(name).seed);displaypublic();}
+    function createSeed(){
 	createseed();
 	displaypublic();
 	var name = prompt("What's the name of this seed?");
-	MyCats.addCat(name);
-
-    }
+	MyCats.addCat(name);}
     function setseed(){
 	var hex = prompt("What's your seed? (Hex format)");
 	xsetseed(hex);
 	displaypublic();
 	var name = prompt("cat's nickname?");
-	MyCats.addCat(name);
-    }
-    function usecat(cats, name){
-	xsetseed(cats.get(name).seed);
-	displaypublic();
-    }
+	MyCats.addCat(name);}
   </script>
   <script>
     var Module = {
@@ -179,8 +148,6 @@
 		var from = e.message.substr(6, 64);
 		var pay = e.message.split('\n').splice(3).join("<br>");
 		var cat = MyCats.findcat(from);
-		//console.log("CAT", cat);
-		//console.log("PAY", pay);
 		function mkMessage(name, verb, msg){
 		    outstr(`<h2>${name} ${verb}</h2>${msg}`);}
 		if(!cat)   outstr(`<h5>anonymous ${from.substr(6)}</h5>${pay}`);
