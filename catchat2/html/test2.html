@@ -1,5 +1,11 @@
 <!doctype html>
 <html>
+  <style>
+    .hr2 {width: 50%;}
+    .post {
+	border: 1px solid blue;
+    }
+  </style>
   <div>
     <li>Controls:
       <input type=checkbox id="usehtml" checked>HTML Output<br>
@@ -28,7 +34,13 @@
     D=document;
     function GEBI(id){return D.getElementById(id);}
     function outt(s){GEBI("out").appendChild(D.createElement("li")).appendChild(D.createTextNode(s));}
-    function outh(s){GEBI("out").appendChild(D.createElement("div")).innerHTML=s;}
+//    function outh(s){GEBI("out").appendChild(D.createElement("div")).innerHTML=s;}
+    function outh(s){
+	var d = D.createElement("div");
+	d.className = "post";
+	var e = GEBI("out").appendChild(d);
+	e.innerHTML = s;
+    }
     function outstr(s){if(GEBI("usehtml").checked) outh(s); else outt(s);}
     var zero8  = "00000000";
     var zero16 = "0000000000000000";
@@ -47,7 +59,7 @@
 	ws.onclose=function(e){outt("PubSub Cxn Closed");};
 	ws.onerror=function(e){outt("PubSub Cxn Error");};
 	ws.onmessage=function(e){
-	    console.log(`Q1[${e.data}]ZZ`);
+	    //console.log(`Q1[${e.data}]ZZ`);
 	    var arr3 = e.data.split(";");
 	    e.ttl = arr3[0];
 	    e.channel = arr3[1];
@@ -152,7 +164,7 @@
 
 	    MyCats = new CatWallet();
 	    usecat(MyCats, "zero");
-	    MyCats.dump();
+	    //MyCats.dump();
 
 	    ws = connect();
 	    ws.onconnect = function(e){
@@ -167,23 +179,22 @@
 		var from = e.message.substr(6, 64);
 		var pay = e.message.split('\n').splice(3).join("<br>");
 		var cat = MyCats.findcat(from);
-		console.log("CAT", cat);
-		console.log("PAY", pay);
-		function mkMessage(verb, msg){
-		    outstr(`<hr><h2>${cat.name} ${verb}</h2>` +
-			   `<div style="width:50%"><hr></div>${msg}`);}
-		if(!cat)   outstr(`anonymous ${from.substr(6)}<hr>${pay}`);
-		else if(pay.startsWith("meow: "))mkMessage("meows", pay.substr(5));
-		else if(pay.startsWith("hiss: "))mkMessage("hisses",pay.substr(5));
-		else if(pay.startsWith("purr: "))mkMessage("purrs", pay.substr(5));
-		else                             mkMessage("UNKNOWN", pay);
+		//console.log("CAT", cat);
+		//console.log("PAY", pay);
+		function mkMessage(name, verb, msg){
+		    outstr(`<h2>${name} ${verb}</h2>${msg}`);}
+		if(!cat)   outstr(`<h5>anonymous ${from.substr(6)}</h5>${pay}`);
+		else if(pay.startsWith("meow: "))mkMessage(cat.name,"meows", pay.substr(5));
+		else if(pay.startsWith("hiss: "))mkMessage(cat.name,"hisses",pay.substr(5));
+		else if(pay.startsWith("purr: "))mkMessage(cat.name,"purrs", pay.substr(5));
+		else                             mkMessage(cat.name,"UNKNOWN",pay);
 	    };
 	    ws.sendit = function(txt){
 		var s0 = xsignit(txt);
 		var msg = s0 + txt;
-		console.log(msg);
+		//console.log(msg);
 		var s2 = xverify(msg);
-		console.log("xverify" + s2);
+		//console.log("xverify" + s2);
 		ws.pub("main", msg);
 		if(GEBI("erase").checked) textarea.value = '';
 	    };
